@@ -1,5 +1,4 @@
-
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
 
 var articleSchema = new mongoose.Schema({
     title: {
@@ -9,7 +8,7 @@ var articleSchema = new mongoose.Schema({
     },
     topic: {
         type: 'string',
-        required: true
+        ref: 'Topic'
     },
     author: {
         type: mongoose.Schema.Types.ObjectId,

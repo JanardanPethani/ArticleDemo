@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "env-cmd -f ./config/dev.env nodemon src/app.js",
-    "test": "env-cmd -f ./config/test.env jest --watch --runInBand"
+    "dev": "nodemon src/app.js",
+    "test": "jest --watch --runInBand"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "assert": "^2.0.0",
     "bcryptjs": "^2.4.3",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
@@ -19,6 +20,7 @@
     "validator": "^13.5.2"
   },
   "devDependencies": {
+    "dotenv": "^8.2.0",
     "env-cmd": "^10.1.0"
   }
 }
