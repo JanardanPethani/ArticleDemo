@@ -4,8 +4,9 @@ var topicSchema = new mongoose.Schema({
     name: {
         type: 'string',
         minLength: 2,
-        required: true
+        required: true,
+        unique: true
     }
-})
+}, { timestamps: { createdAt: 'created_at' } })
 
-module.exports = monoose.model('Topic', topicSchema)
+module.exports = mongoose.model('Topic', topicSchema)

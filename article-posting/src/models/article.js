@@ -10,17 +10,21 @@ var articleSchema = new mongoose.Schema({
         type: 'string',
         ref: 'Topic'
     },
+    content: {
+        type: 'string',
+        minLength: 5,
+        required: true
+    },
+    comments: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Comment'
+        }
+    ],
     author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    },
-    comments: [{
-        text: String,
-        postedBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        }
-    }]
-});
+    }
+}, { timestamps: { createdAt: 'created_at' } });
 
 module.exports = mongoose.model("Article", articleSchema);

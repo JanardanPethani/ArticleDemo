@@ -1,14 +1,14 @@
 const mongoose = require('mongoose')
-
-try {
-    mongoose.connect(process.env.MONGODB_URL, {
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useFindAndModify: false,
-        useUnifiedTopology: true
-    }, () => {
-        console.log('Conncted to db ');
+var assert = require('assert');
+mongoose.Promise = global.Promise;
+mongoose.connect(
+    process.env.MONGODB_URL,
+    {
+        useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false,
+    },
+    function (err, db) {
+        assert.equal(null, err);
+        console.log("-- Connected successfully to database");
     })
-} catch (e) {
-    console.log(e);
-};
+mongoose.connection.on("error", console.error.bind(console, "MongoDB connection Error:"));
+// mongoose.set('debug', true);
