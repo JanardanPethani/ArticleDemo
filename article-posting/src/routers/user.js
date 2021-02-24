@@ -18,6 +18,10 @@ router.post("/users/sign-up", async (req, res) => {
 
 })
 
+router.get('/logout', (req, res) => {
+    res.clearCookie('nToken');
+});
+
 
 
 module.exports = router
