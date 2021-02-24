@@ -55,7 +55,7 @@ router.post('/users/logoutAll', auth, async (req, res) => {
         req.user.tokens = []
 
         await req.user.save()
-        res.send({ message: 'Successfuly log out from all sessions' })
+        res.send({ message: 'Successfuly log out from all sessions ' + req.user.username })
 
     } catch (e) {
         res.status(500).send({ error: "Error" + e })

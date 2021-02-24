@@ -44,6 +44,7 @@ const UserSchema = new mongoose.Schema({
     timestamps: { createdAt: 'created_at' }
 })
 
+ 
 //ES6 => functions do not bind this!
 UserSchema.pre("save", async function (next) {
     // ENCRYPT PASSWORD

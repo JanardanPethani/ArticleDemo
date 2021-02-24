@@ -1,5 +1,6 @@
 var mongoose = require('mongoose')
 var Topic = require('./topic')
+var Comment = require('./comment')
 
 var articleSchema = new mongoose.Schema({
     title: {
@@ -32,7 +33,7 @@ var articleSchema = new mongoose.Schema({
 
 articleSchema.pre('save', async function (next) {
     const article = this
-    console.log(typeof article.topic);
+    // console.log(typeof article.topic);
     const topicName = await Topic.findOne({ name: article.topic })
     if (topicName) {
         next()
@@ -44,6 +45,17 @@ articleSchema.pre('save', async function (next) {
         await newTopic.save()
         next()
     }
+})
+
+articleSchema.pre('remove', async function (next) {
+    const article = this
+    await Comment.deleteMany(
+        {
+            _id: {
+                $in: article.comments
+            }
+        })
+    next()
 })
 
 module.exports = mongoose.model("Article", articleSchema);

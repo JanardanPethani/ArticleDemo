@@ -23,12 +23,6 @@ router.post("/articles/new", auth, async (req, res) => {
     }
 })
 
-router.get("/articles/all", async (req, res) => {
-    Article.find({}).populate('comments').populate('author').exec((err, result) => {
-        res.send(result)
-    })
-})
-
 router.get("/articles/:id", async (req, res) => {
     Article.find({ author: req.params.id }).populate('comments').exec((err, result) => {
         if (err) {
@@ -37,6 +31,37 @@ router.get("/articles/:id", async (req, res) => {
 
         res.send(result)
     })
+})
+
+
+
+//* Filter options
+// 1. Latest
+// 2. All
+// 3. Topic
+
+router.get("/articles", async (req, res) => {
+    const topic = req.query.topic ? req.query.topic : false
+    const all = req.query.All ? req.query.All : false
+    const latest = req.query.Latest ? req.query.Latest : false
+
+    var query = Article.find({});
+    if (latest) {
+        query.sort({ created_at: -1 }).limit(+latest)
+    }
+    if (!all) {
+        if (topic) {
+            query.where('topic', topic)
+        }
+    }
+
+    query.populate('author').exec(function (err, docs) {
+        if (err) {
+            res.status(500).send(err)
+        }
+        res.send(docs)
+    });
+
 })
 
 router.patch('/articles/:id', auth, async (req, res) => {
@@ -61,7 +86,7 @@ router.patch('/articles/:id', auth, async (req, res) => {
         }
 
         res.send(result)
-        
+
     } catch (e) {
         console.log(e);
         res.status(400).send()
@@ -71,7 +96,7 @@ router.patch('/articles/:id', auth, async (req, res) => {
 router.delete('/articles/:id', auth, async (req, res) => {
     try {
         const article = await Article.findOneAndDelete({ _id: req.params.id, author: req.user._id })
-
+        await User.updateOne({ _id: req.user._id }, { $pull: { "articles": req.params.id } })
         if (!article) {
             return res.status(404).send()
         }
