@@ -1,9 +1,11 @@
 const express = require('express')
 const Topic = require('../models/topic')
+const User = require('../models/user')
+const auth = require('../middleware/auth')
 
 const router = new express.Router()
 
-router.post("/topics/new", async (req, res) => {
+router.post("/topics/new", auth, async (req, res) => {
     const topic = new Topic(req.body)
 
     try {

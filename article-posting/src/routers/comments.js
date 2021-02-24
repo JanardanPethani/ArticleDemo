@@ -3,6 +3,8 @@ const router = new express.Router()
 
 const Comment = require('../models/comment')
 const Article = require('../models/article')
+const User = require('../models/user')
+const auth = require('../middleware/auth')
 
 router.post("/articles/:articleId/comment", async (req, res) => {
     // INSTANTIATE INSTANCE OF MODEL

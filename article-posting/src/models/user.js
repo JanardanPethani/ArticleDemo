@@ -45,36 +45,54 @@ const UserSchema = new mongoose.Schema({
 })
 
 //ES6 => functions do not bind this!
-UserSchema.pre("save", function (next) {
+UserSchema.pre("save", async function (next) {
     // ENCRYPT PASSWORD
-    const user = this;
-    if (!user.isModified("password")) {
-        return next();
+    const user = this
+    if (user.isModified('password')) {
+        user.password = await bcrypt.hash(user.password, 8)
     }
-    bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(user.password, salt, (err, hash) => {
-            user.password = hash;
-            next();
-        });
-    });
+    next()
 });
 
-// Need to use function to enable this.password to work.
-UserSchema.methods.comparePassword = function (password, done) {
-    bcrypt.compare(password, this.password, (err, isMatch) => {
-        done(err, isMatch);
-    });
-};
-
-
-userSchema.methods.generateAuthToken = async function () {
+UserSchema.methods.generateAuthToken = async function () {
     const user = this
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SIGN)
+    const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SIGN)
 
     user.tokens = user.tokens.concat({ token })
     await user.save()
-
+    // console.log('error');
     return token
 }
 
-module.exports = mongoose.model('User', UserSchema)
+UserSchema.statics.findByCredentials = async (username, password) => {
+    const user = await User.findOne({ username })
+
+    if (!user) {
+        console.log('user not found');
+        throw new Error("Wrong Username or Password")
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password)
+
+    if (!isMatch) {
+        console.log('not match');
+        throw new Error('Wrong Username or Password')
+    }
+
+    return user
+}
+
+UserSchema.methods.toJSON = function () {
+    const user = this
+    const userObj = user.toObject()
+
+    delete userObj.password
+    delete userObj.tokens
+    delete userObj.followers
+    delete userObj.following
+
+    return userObj
+}
+
+const User = mongoose.model('User', UserSchema)
+module.exports = User
