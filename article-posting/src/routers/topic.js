@@ -7,11 +7,12 @@ const router = new express.Router()
 
 router.post("/topics/new", auth, async (req, res) => {
     try {
-        const isAvail = await Topic.isAvailable(req.body.name)
         const newTopic = new Topic({
             ...req.body,
             createdBy: req.user._id
         })
+        const isAvail = await Topic.isAvailable(req.body.name)
+
         await newTopic.save()
         res.status(201).send(newTopic)
     } catch (err) {
@@ -20,12 +21,10 @@ router.post("/topics/new", auth, async (req, res) => {
     }
 })
 
-router.get("/topics/all", async (req, res) => {
+router.get("/topics/all", auth, async (req, res) => {
     Topic.find({}).populate('createdBy').exec((err, result) => {
         res.send(result)
     })
 })
-
-
 
 module.exports = router

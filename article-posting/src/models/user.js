@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 var jwt = require('jsonwebtoken')
+const Article = require('./article')
+var Comment = require('./comment')
 
 
 // Schema object
@@ -44,7 +46,7 @@ const UserSchema = new mongoose.Schema({
     timestamps: { createdAt: 'created_at' }
 })
 
- 
+
 //ES6 => functions do not bind this!
 UserSchema.pre("save", async function (next) {
     // ENCRYPT PASSWORD
@@ -54,6 +56,19 @@ UserSchema.pre("save", async function (next) {
     }
     next()
 });
+
+UserSchema.pre('remove', async function (next) {
+    const user = this
+    await Article.deleteMany(
+        {
+            author: user._id
+        })
+    await Comment.deleteMany(
+        {
+            by: user._id
+        })
+    next()
+})
 
 UserSchema.methods.generateAuthToken = async function () {
     const user = this

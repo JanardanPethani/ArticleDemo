@@ -2,6 +2,7 @@ const express = require('express')
 const Article = require('../models/article')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
+var Comment = require('../models/comment')
 
 const router = new express.Router()
 
@@ -55,7 +56,7 @@ router.get("/articles", async (req, res) => {
         }
     }
 
-    query.populate('author').exec(function (err, docs) {
+    query.populate('author').populate('comments').exec(function (err, docs) {
         if (err) {
             res.status(500).send(err)
         }
@@ -95,8 +96,10 @@ router.patch('/articles/:id', auth, async (req, res) => {
 
 router.delete('/articles/:id', auth, async (req, res) => {
     try {
-        const article = await Article.findOneAndDelete({ _id: req.params.id, author: req.user._id })
+        const article = await Article.findOneAndRemove({ _id: req.params.id, author: req.user._id })
         await User.updateOne({ _id: req.user._id }, { $pull: { "articles": req.params.id } })
+        await Comment.deleteMany({ for: article._id })
+        console.log(article._id);
         if (!article) {
             return res.status(404).send()
         }
