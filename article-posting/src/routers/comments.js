@@ -6,9 +6,12 @@ const Article = require('../models/article')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
 
-router.post("/articles/:articleId/comment", async (req, res) => {
+router.post("/articles/:articleId/comment", auth, async (req, res) => {
     // INSTANTIATE INSTANCE OF MODEL
-    const comment = new Comment(req.body);
+    const comment = new Comment({
+        ...req.body,
+        by: req.user._id
+    });
 
     try {
         await comment.save()

@@ -1,4 +1,5 @@
 var mongoose = require('mongoose')
+var Topic = require('./topic')
 
 var articleSchema = new mongoose.Schema({
     title: {
@@ -18,13 +19,31 @@ var articleSchema = new mongoose.Schema({
     comments: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Comment'
+            ref: 'Comment',
+            required: true
         }
     ],
     author: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        required: true
     }
 }, { timestamps: { createdAt: 'created_at' } });
+
+articleSchema.pre('save', async function (next) {
+    const article = this
+    console.log(typeof article.topic);
+    const topicName = await Topic.findOne({ name: article.topic })
+    if (topicName) {
+        next()
+    } else {
+        const newTopic = new Topic({
+            name: article.topic,
+            createdBy: article.author
+        })
+        await newTopic.save()
+        next()
+    }
+})
 
 module.exports = mongoose.model("Article", articleSchema);

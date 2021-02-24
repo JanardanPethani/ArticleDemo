@@ -6,18 +6,22 @@ const auth = require('../middleware/auth')
 const router = new express.Router()
 
 router.post("/topics/new", auth, async (req, res) => {
-    const topic = new Topic(req.body)
-
     try {
-        await topic.save()
-        res.status(201).send({ topic })
-    } catch (e) {
-        res.status(400).send(e.message)
+        const isAvail = await Topic.isAvailable(req.body.name)
+        const newTopic = new Topic({
+            ...req.body,
+            createdBy: req.user._id
+        })
+        await newTopic.save()
+        res.status(201).send(newTopic)
+    } catch (err) {
+        // console.log(err.message);
+        res.status(400).send(err.message)
     }
 })
 
 router.get("/topics/all", async (req, res) => {
-    Topic.find({}, (err, result) => {
+    Topic.find({}).populate('createdBy').exec((err, result) => {
         res.send(result)
     })
 })
