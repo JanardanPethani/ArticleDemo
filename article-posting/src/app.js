@@ -9,6 +9,8 @@ const userRouter = require('./routers/user')
 const articleRouter = require('./routers/article')
 const topicRouter = require('./routers/topic')
 const commentRouter = require('./routers/comments')
+var cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 
 const app = express()
 
@@ -17,7 +19,6 @@ app.use(userRouter)
 app.use(articleRouter)
 app.use(topicRouter)
 app.use(commentRouter)
-
 
 port = process.env.PORT
 

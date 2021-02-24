@@ -1,9 +1,11 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
+var jwt = require('jsonwebtoken')
+
 
 // Schema object
-const userSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -30,17 +32,49 @@ const userSchema = new mongoose.Schema({
     },
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    articles: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }]
+    articles: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
+
+    tokens: [{
+        token: {
+            type: String,
+            required: true
+        }
+    }]
 }, {
-    timestamps: true
+    timestamps: { createdAt: 'created_at' }
 })
 
-userSchema.pre('save', async function (next) {
-    const user = this
-    if (user.isModified('password')) {
-        user.password = await bcrypt.hash(user.password, 8)
+//ES6 => functions do not bind this!
+UserSchema.pre("save", function (next) {
+    // ENCRYPT PASSWORD
+    const user = this;
+    if (!user.isModified("password")) {
+        return next();
     }
-    next()
-})
+    bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(user.password, salt, (err, hash) => {
+            user.password = hash;
+            next();
+        });
+    });
+});
 
-module.exports = mongoose.model('User', userSchema)
+// Need to use function to enable this.password to work.
+UserSchema.methods.comparePassword = function (password, done) {
+    bcrypt.compare(password, this.password, (err, isMatch) => {
+        done(err, isMatch);
+    });
+};
+
+
+userSchema.methods.generateAuthToken = async function () {
+    const user = this
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SIGN)
+
+    user.tokens = user.tokens.concat({ token })
+    await user.save()
+
+    return token
+}
+
+module.exports = mongoose.model('User', UserSchema)
