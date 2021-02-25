@@ -46,4 +46,18 @@ articleSchema.pre('save', async function (next) {
     }
 })
 
-module.exports = mongoose.model("Article", articleSchema);
+articleSchema.statics.getByAuthors = async function (user) {
+    const following = [...user.following]
+    console.log(following);
+
+    const promises = await following.map(async user => {
+        const result = await Article.find({ author: user.user })
+        return result
+    });
+    const articles = await Promise.all(promises);
+    // console.log(articles);
+    return articles
+}
+
+const Article = mongoose.model("Article", articleSchema);
+module.exports = Article

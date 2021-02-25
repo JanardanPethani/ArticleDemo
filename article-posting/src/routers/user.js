@@ -66,6 +66,9 @@ router.post('/users/logoutAll', auth, async (req, res) => {
 // done
 router.post('/users/:userId/follow', auth, async (req, res) => {
     try {
+        if (req.params.userId == req.user._id) {
+            throw new Error('Can not follow your self')
+        }
         const user = await User.findById(req.params.userId)
         if (!user) {
             throw new Error('Not found')
@@ -84,10 +87,36 @@ router.post('/users/:userId/follow', auth, async (req, res) => {
         res.status(200).send(`Followed ${user.name}`)
     }
     catch (err) {
-        res.status(500).send(err)
+        res.status(500).send(err.message)
     }
 })
 
+//done
+router.post('/users/:userId/unfollow', auth, async (req, res) => {
+    try {
+        if (req.params.userId == req.user._id) {
+            throw new Error('Can not unfollow your self')
+        }
+        const user = await User.findById(req.params.userId)
+        if (!user) {
+            throw new Error('Not found')
+        }
+
+        const userFound = await User.updateOne({ _id: req.user._id }, { $pull: { following: { user: user._id } } })
+        if (!userFound) {
+            throw new Error("Can't find in following")
+        }
+
+        await User.updateOne({ _id: user._id }, { $pull: { followers: { user: req.user._id } } })
+        await req.user.save()
+        await user.save()
+        // console.log(user, req.user);
+        res.status(200).send(`unFollowed ${user.name}`)
+    }
+    catch (err) {
+        res.status(500).send(err.message)
+    }
+})
 
 // done
 router.get('/users/me', auth, async (req, res) => {

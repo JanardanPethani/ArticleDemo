@@ -42,6 +42,7 @@ router.get("/articles/:id", async (req, res) => {
 // 1. Latest
 // 2. All
 // 3. Topic
+// 4. Following
 
 // done
 router.get("/articles", async (req, res) => {
@@ -68,7 +69,19 @@ router.get("/articles", async (req, res) => {
 
 })
 
+router.get("/follow", auth, async (req, res) => {
 
+    // console.log(req.user)
+    try {
+        const articles = await Article.getByAuthors(req.user)
+        res.send(articles)
+    } catch (err) {
+        res.status(500).send(err)
+    }
+    // let followings = 
+
+
+})
 
 // done
 router.patch('/articles/:id', auth, async (req, res) => {

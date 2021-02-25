@@ -104,8 +104,8 @@ UserSchema.methods.toJSON = function () {
 
     delete userObj.password
     delete userObj.tokens
-    delete userObj.followers
-    delete userObj.following
+    // delete userObj.followers
+    // delete userObj.following
 
     return userObj
 }
