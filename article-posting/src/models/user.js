@@ -5,7 +5,6 @@ var jwt = require('jsonwebtoken')
 const Article = require('./article')
 var Comment = require('./comment')
 
-
 // Schema object
 const UserSchema = new mongoose.Schema({
     name: {
@@ -17,7 +16,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        minLength: 4,
+        minLength: 3,
         trim: true,
         lowercase: true
     },
@@ -32,8 +31,8 @@ const UserSchema = new mongoose.Schema({
             }
         }
     },
-    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    following: [{ user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } }],
+    followers: [{ user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } }],
     articles: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
 
     tokens: [{
@@ -45,7 +44,6 @@ const UserSchema = new mongoose.Schema({
 }, {
     timestamps: { createdAt: 'created_at' }
 })
-
 
 //ES6 => functions do not bind this!
 UserSchema.pre("save", async function (next) {
@@ -67,6 +65,8 @@ UserSchema.pre('remove', async function (next) {
         {
             by: user._id
         })
+    await User.updateMany({}, { $pull: { followers: { user: user._id } } })
+    await User.updateMany({}, { $pull: { following: { user: user._id } } })
     next()
 })
 

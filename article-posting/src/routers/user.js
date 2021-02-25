@@ -5,6 +5,7 @@ const auth = require('../middleware/auth')
 
 const router = new express.Router()
 
+// done
 router.post("/users/sign-up", async (req, res) => {
     const user = new User(req.body)
 
@@ -14,11 +15,13 @@ router.post("/users/sign-up", async (req, res) => {
         res.status(201).send({ user, token })
 
     } catch (e) {
+        console.log(e);
         res.status(400).send(e.message)
     }
 
 })
 
+// done
 router.post("/users/login", async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body.username, req.body.password)
@@ -31,6 +34,7 @@ router.post("/users/login", async (req, res) => {
 });
 
 
+// done
 router.post('/users/logout', auth, async (req, res) => {
     try {
         req.user.tokens = req.user.tokens.filter((token) => {
@@ -46,6 +50,7 @@ router.post('/users/logout', auth, async (req, res) => {
     }
 })
 
+// done
 router.post('/users/logoutAll', auth, async (req, res) => {
     try {
         req.user.tokens = []
@@ -58,9 +63,47 @@ router.post('/users/logoutAll', auth, async (req, res) => {
     }
 })
 
+// done
+router.post('/users/:userId/follow', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId)
+        if (!user) {
+            throw new Error('Not found')
+        }
+
+        const userFound = await User.findOne({ _id: req.user._id, 'following.user': user._id })
+        if (userFound) {
+            throw new Error('Already Subscribed')
+        }
+
+        await req.user.following.push({ user: user._id })
+        await user.followers.push({ user: req.user._id })
+        await req.user.save()
+        await user.save()
+        // console.log(user, req.user);
+        res.status(200).send(`Followed ${user.name}`)
+    }
+    catch (err) {
+        res.status(500).send(err)
+    }
+})
+
+
+// done
 router.get('/users/me', auth, async (req, res) => {
 
     res.send(req.user)
 
 })
+
+// done
+router.delete('/users/me', auth, async (req, res) => {
+    try {
+        await req.user.remove()
+        res.send(req.user)
+    } catch (e) {
+        res.status(500).send(e)
+    }
+})
+
 module.exports = router

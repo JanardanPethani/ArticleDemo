@@ -6,6 +6,7 @@ var Comment = require('../models/comment')
 
 const router = new express.Router()
 
+// done
 router.post("/articles/new", auth, async (req, res) => {
     const article = new Article(
         {
@@ -24,6 +25,7 @@ router.post("/articles/new", auth, async (req, res) => {
     }
 })
 
+// done
 router.get("/articles/:id", async (req, res) => {
     Article.find({ author: req.params.id }).populate('comments').exec((err, result) => {
         if (err) {
@@ -41,6 +43,7 @@ router.get("/articles/:id", async (req, res) => {
 // 2. All
 // 3. Topic
 
+// done
 router.get("/articles", async (req, res) => {
     const topic = req.query.topic ? req.query.topic : false
     const all = req.query.All ? req.query.All : false
@@ -65,6 +68,9 @@ router.get("/articles", async (req, res) => {
 
 })
 
+
+
+// done
 router.patch('/articles/:id', auth, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ["title", "topic", "content"]
@@ -94,6 +100,7 @@ router.patch('/articles/:id', auth, async (req, res) => {
     }
 })
 
+// done
 router.delete('/articles/:id', auth, async (req, res) => {
     try {
         const article = await Article.findOneAndRemove({ _id: req.params.id, author: req.user._id })

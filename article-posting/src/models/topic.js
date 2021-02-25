@@ -14,13 +14,6 @@ var topicSchema = new mongoose.Schema({
     }
 }, { timestamps: { createdAt: 'created_at' } })
 
-topicSchema.statics.isAvailable = async (name) => {
-    const topic = await Topic.findOne({ name })
-    if (topic) {
-        throw new Error('Topic is Available')
-    }
-    return true
-}
 
 // UserSchema.methods.toJSON = function () {
 //     const topic = this
